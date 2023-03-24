@@ -1,0 +1,269 @@
+-- Define RespawnTimes as a table with some values
+
+local RespawnTimes = {
+
+  Player1 = 5,
+
+  Player2 = 7,
+
+  Player3 = 3
+
+}
+
+-- Define isR6 as a function that takes a player and returns a boolean
+
+local function isR6(player)
+
+  -- implementation here
+
+end
+
+-- Define isSat as a function that takes a player and returns a boolean
+
+local function isSat(player)
+
+  -- implementation here
+
+end
+
+-- Define GetPlayer as a function that takes a player name and returns a Player object
+
+local function GetPlayer(playerName)
+
+  -- implementation here
+
+end
+
+-- Define GetRoot as a function that takes a model and returns its root part
+
+local function GetRoot(model)
+
+  -- implementation here
+
+end
+
+-- Define ReplaceHumanoid as a function that replaces a player's humanoid with a new one
+
+local function ReplaceHumanoid(player)
+
+  -- implementation here
+
+end
+
+-- Define GetCharacter as a function that takes a player and returns their character model
+
+local function GetCharacter(player)
+
+  -- implementation here
+
+end
+
+-- Define UnequipTools as a function that unequips all tools from a player's humanoid
+
+local function UnequipTools(humanoid)
+
+  -- implementation here
+
+end
+
+-- Define GetCorrectToolWithHandle as a function that returns a tool with a handle
+
+local function GetCorrectToolWithHandle()
+
+  -- implementation here
+
+end
+
+-- Define CFrameTool as a function that sets the CFrame of a tool to a given position
+
+local function CFrameTool(tool, position)
+
+  -- implementation here
+
+end
+
+-- Define firetouchinterest as a function that fires touch events between two parts
+
+local function firetouchinterest(part1, part2, event)
+
+  -- implementation here
+
+end
+
+-- Define ChangeState as a function that changes a humanoid's state
+
+local function ChangeState(humanoid, state)
+
+  -- implementation here
+
+end
+
+-- Define Camera as a camera object
+
+local Camera = game.Workspace.CurrentCamera
+
+-- Define Utils.Notify as a function that displays a notification to a player
+
+local Utils = {
+
+  Notify = function(player, title, message)
+
+    -- implementation here
+
+  end
+
+}
+
+-- Define Caller as a player object
+
+local Caller = game.Players.LocalPlayer
+
+-- Define LocalPlayer as a player object
+
+local LocalPlayer = game.Players.LocalPlayer
+
+-- Define Vector3New as a function that creates a new Vector3 object
+
+local Vector3New = Vector3.new
+
+-- Define CWait as a function that waits for a character to be added to the game
+
+local function CWait(event)
+
+  -- implementation here
+
+end
+
+-- Define WaitForChild as a function that waits for a child object to be added to a parent object
+
+local function WaitForChild(parent, childName)
+
+  -- implementation here
+
+end
+
+    local Target = GetPlayer(Dropdown.CurrentOption);
+
+    local OldPos = GetRoot().CFrame
+
+    local Humanoid = ReplaceHumanoid();
+
+    local TempRespawnTimes = {}
+
+    for i, v in next, Target do
+
+        TempRespawnTimes[v.Name] = RespawnTimes[LocalPlayer.Name] <= RespawnTimes[v.Name]
+
+    end
+
+    local Character = GetCharacter();
+
+    for i, v in next, Target do
+
+        if (#Target == 1 and TempRespawnTimes[v.Name] and isR6(v)) then
+
+            Destroy(Character);
+
+            Character = CWait(LocalPlayer.CharacterAdded);
+
+            WaitForChild(Character, "Humanoid");
+
+            wait()
+
+            Humanoid = ReplaceHumanoid();
+
+        end
+
+    end
+
+    if (Character.Animate) then
+
+        Character.Animate.Disabled = true
+
+    end
+
+    UnequipTools(Humanoid);
+
+    local TChar;
+
+    CThread(function()
+
+        for i = 1, #Target do
+
+            local v = Target[i]
+
+            TChar = GetCharacter(v);
+
+            if (TChar) then
+
+                if (isSat(v)) then
+
+                    if (#Target == 1) then
+
+                        Utils.Notify(Caller or LocalPlayer, nil, v.Name .. " is sitting down, could not kill");
+
+                    end
+
+                    continue
+
+                end
+
+                local TargetRoot = GetRoot(v);
+
+                if (not TargetRoot) then
+
+                    continue
+
+                end
+
+                if (RespawnTimes[LocalPlayer.Name] <= RespawnTimes[v.Name] and isR6(v)) then
+
+                    continue
+
+                end
+
+                local Tool = GetCorrectToolWithHandle();
+
+                if (not Tool) then
+
+                    continue
+
+                end
+
+                Tool.Parent = Character
+
+                Tool.Handle.Size = Vector3New(4, 4, 4);
+
+                CFrameTool(Tool, TargetRoot.CFrame);
+
+                firetouchinterest(TargetRoot, Tool.Handle, 0);
+
+                firetouchinterest(TargetRoot, Tool.Handle, 1);
+
+            else
+
+                Utils.Notify(Caller or LocalPlayer, "Fail", v.Name .. " is dead or does not have a root part, could not kill.");
+
+            end
+
+        end
+
+    end)()
+
+    ChangeState(Humanoid, 15);
+
+    if (_L.KillCam and #Target == 1 and TChar) then
+
+        Camera.CameraSubject = TChar
+
+    end
+
+    wait(.3);
+
+    Destroy(Character);
+
+    Character = CWait(LocalPlayer.CharacterAdded);
+
+    WaitForChild(Character, "HumanoidRootPart").CFrame = OldPos
+
+end)
